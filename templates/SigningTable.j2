@@ -1,0 +1,3 @@
+{% for item in dkim_selectors %}
+*@{{ dkim_domain }} {{ item }}._domainkey.{{ dkim_domain }}
+{% endfor %}

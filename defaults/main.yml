@@ -1,0 +1,30 @@
+---
+# defaults file for dkim
+
+dkim_service_state: started
+dkim_service_enabled: true
+
+dkim_config_template: opendkim.conf.j2
+dkim_config_file: /etc/opendkim.conf
+
+dkim_mode: sv
+dkim_subdomains: no
+# dkim_socket: local:/run/opendkim/opendkim.sock
+# dkim_socket: inet:127.0.0.1:8891
+dkim_socket: local:/var/spool/postfix/opendkim/opendkim.sock
+
+dkim_config_dir: /etc/opendkim
+dkim_key_dir: "{{ dkim_config_dir }}/keys"
+#dkim_keyfile: "{{ dkim_config_dir }}/keys/{{ dkim_selector }}.private"
+dkim_keytable: "{{ dkim_config_dir }}/KeyTable"
+dkim_signingtable: "{{ dkim_config_dir }}/SigningTable"
+dkim_externalignorelist: "{{ dkim_config_dir }}/TrustedHosts"
+dkim_internalhosts: "{{ dkim_config_dir }}/TrustedHosts"
+dkim_trustedhosts_file: "{{ dkim_config_dir }}/TrustedHosts"
+
+dkim_requiresafekeys: "False"
+
+dkim_local_dir: dkim
+
+dkim_socket_users: 
+  - postfix

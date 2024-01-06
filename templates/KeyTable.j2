@@ -1,0 +1,3 @@
+{% for item in dkim_selectors %}
+{{ item }}._domainkey.{{ dkim_domain }} {{ dkim_domain }}:{{ item }}:{{ dkim_key_dir }}/{{ dkim_domain }}/{{ item }}.private
+{% endfor %}

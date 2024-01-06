@@ -1,0 +1,116 @@
+---
+# tasks file for dkim
+
+- name: Install OpenDKIM
+  package:
+    name: opendkim
+    state: present
+
+- name: Ensure opendkim socket directory exists
+  file:
+    path: "{{ dkim_socket.split(':')[1] | dirname }}"
+    state: directory
+    owner: opendkim
+    group: opendkim
+    mode: 0750
+  when: dkim_socket.split(':')[0] == 'local'
+
+- name: Set DKIM configuration
+  template:
+    src: "{{ dkim_config_template }}"
+    dest: "{{ dkim_config_file }}"
+    mode: 0644
+  notify: restart opendkim
+
+- name: Create opendkim config directory
+  file:
+    path: "{{ dkim_config_dir }}"
+    state: directory
+    mode: 0755
+
+- name: Set key table
+  template:
+    src: KeyTable.j2
+    dest: "{{ dkim_keytable }}"
+    mode: 0644
+  notify: restart opendkim
+
+- name: Set signing table
+  template:
+    src: SigningTable.j2
+    dest: "{{ dkim_signingtable }}"
+    mode: 0644
+  notify: restart opendkim
+
+- name: Set trusted hosts
+  template:
+    src: TrustedHosts.j2
+    dest: "{{ dkim_trustedhosts_file }}"
+    mode: 0644
+  notify: restart opendkim
+
+- name: Create opendkim keys directory
+  file: 
+    path: "{{ dkim_key_dir }}"
+    state: directory
+    owner: opendkim
+    group: opendkim
+    mode: 0740
+
+- name: Create domain keys directory
+  file:
+    path: "{{ dkim_key_dir }}/{{ dkim_domain }}"
+    state: directory
+    owner: opendkim
+    group: opendkim
+    mode: 0740
+
+- name:  Generate private/public keys
+  command:
+    argv: 
+      - /usr/sbin/opendkim-genkey
+      - --bits
+      - "{{ dkim_key_bits | default(2048) }}"
+      - --domain
+      - "{{ dkim_domain }}"
+      - --directory
+      - "{{ dkim_key_dir }}/{{ dkim_domain }}"
+      - --selector
+      - "{{ item }}"
+    creates: "{{ dkim_key_dir }}/{{ dkim_domain }}/{{ item }}.private"
+  loop: "{{ dkim_selectors }}"
+  notify: restart opendkim
+
+- name: Add users to opendkim group
+  user:
+    name: "{{ item }}"
+    groups: opendkim
+    append: true
+  loop: "{{ dkim_socket_users }}"
+
+- name: Set private key ownership
+  file: 
+    path: "{{ dkim_key_dir }}/{{ dkim_domain }}/{{ item }}.private"
+    owner: opendkim
+    group: opendkim
+    mode: 0600
+  loop: "{{ dkim_selectors }}"
+
+- name: Create local dkim txt folder
+  file:
+    path: "{{ dkim_local_dir }}"
+    state: directory
+
+- name: Get DKIM txt files
+  fetch:
+    src: "{{ dkim_key_dir + '/' + dkim_domain + '/' + item + '.txt' }}"
+    dest: "{{ dkim_local_dir + '/' + dkim_domain + '-' + item + '.txt' }}"
+  loop: "{{ dkim_selectors }}"
+
+
+- name: Ensure postfix is started and enabled at boot
+  service:
+    name: opendkim
+    state: "{{ dkim_service_state }}"
+    enabled: "{{ dkim_service_enabled }}"
+
