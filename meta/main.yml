@@ -2,8 +2,6 @@ galaxy_info:
   author: Dennis Vesterlund
   description: Deploy and configure openDKIM
 
-  issue_tracker_url: https://gitlab.com/Vestern/ansible-role-dkim/-/issues
-
   license: BSD-3-Clause
 
   min_ansible_version: 2.10
