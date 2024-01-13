@@ -22,7 +22,7 @@ dkim_externalignorelist: "{{ dkim_config_dir }}/TrustedHosts"
 dkim_internalhosts: "{{ dkim_config_dir }}/TrustedHosts"
 dkim_trustedhosts_file: "{{ dkim_config_dir }}/TrustedHosts"
 
-dkim_requiresafekeys: "False"
+dkim_requiresafekeys: false
 
 dkim_local_dir: dkim
 

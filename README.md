@@ -1,7 +1,7 @@
 Role Name
 =========
 
-Deploy and configure opendkim
+Deploy and configure [OpenDKIM](http://www.opendkim.org/)
 
 Requirements
 ------------
@@ -11,42 +11,29 @@ None.
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variable                | Required | Default                                         | Description                                 |
+| ----------------------- | -------- | ----------------------------------------------- | ------------------------------------------- |
+| dkim_domain             | Yes      |                                                 | Domain to setup DKIM for                    |
+| dkim_selectors          | Yes      |                                                 | Selectors for the domain. Added to DNS      |
+| dkim_trustedhosts       | No       |                                                 | OpenDKIM option                             |
+| dkim_config_dir         | No       | /etc/opendkim                                   | Where the OpenDKIM config directory         |
+| dkim_key_dir            | No       | {{ dkim_config_dir }}/keys                      | Where the OpenDKIM keyfiles and definitions |
+| dkim_service_state      | No       | started                                         | State of the OpenDKIM systemd service       |
+| dkim_service_enbled     | No       | true                                            | If the OpenDKIM service should be enabled   |
+| dkim_config_template    | No       | opendkim.conf.j2                                | Specifies what template to use              |
+| dkim_config_file        | No       | /etc/opendkim.conf                              | Path to the OpenDKIM configuration file     |
+| dkim_keytable           | No       | {{ dkim_config_dir }}/KeyTable                  | OpenDKIM option                             |
+| dkim_signingtable       | No       | {{ dkim_config_dir }}/SigningTable              | OpenDKIM option                             |
+| dkim_externalignorelist | No       | {{ dkim_config_dir }}/TrustedHosts              | OpenDKIM option                             |
+| dkim_internalhosts      | No       | {{ dkim_config_dir }}/TrustedHosts              | OpenDKIM option                             |
+| dkim_trustedhosts_file  | No       | {{ dkim_config_dir }}/TrustedHosts              | Path to TrustedHosts file                   |
+| dkim_mode               | No       | sv                                              | OpenDKIM option                             |
+| dkim_subdomains         | No       | false                                           | OpenDKIM option                             |
+| dkim_socket             | No       | local:/var/spool/postfix/opendkim/opendkim.sock | OpenDKIM option                             |
+| dkim_requiresafekeys    | No       | false                                           | OpenDKIM option                             |
+| dkim_local_dir          | No       | dkim                                            | Local folder where to place DKIM txt files  |
+| dkim_socket_users       | No       | [postfix]                                       | List of users to add to the opendkim group  |
 
-    dkim_service_state
-    dkim_service_enabled
-
-Options for OpenDKIM service.
-
-    dkim_config_dir
-    dkim_key_dir
-
-Options for where important folders are located. `dkim_config_dir` is the standard configuration directory. `dkim_key_dir` is where the keyfiles and definitions are located.
-
-    dkim_config_template
-    dkim_config_file
-
-Options for configuration. `dkim_config_template` is specifies what template to use. `dkim_config_file` specifies where the OpenDKIM config file is located.
-
-    dkim_keytable
-    dkim_signingtable
-    dkim_externalignorelist
-    dkim_internalhosts
-    dkim_trustedhosts_file
-
-Options for where the different configuration files are located.
-
-    dkim_mode
-    dkim_subdomains
-    dkim_socket
-    dkim_requiresafekeys
-    dkim_local_dir
-
-Options for the OpenDKIM configuration.
-
-    dkim_socket_users
-
-Users to add to the OpenDKIM group.
 
 Dependencies
 ------------
