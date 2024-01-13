@@ -2,72 +2,72 @@
 # tasks file for dkim
 
 - name: Install OpenDKIM
-  package:
+  ansible.builtin.package:
     name: opendkim
     state: present
 
 - name: Ensure opendkim socket directory exists
-  file:
+  ansible.builtin.file:
     path: "{{ dkim_socket.split(':')[1] | dirname }}"
     state: directory
     owner: opendkim
     group: opendkim
-    mode: 0750
+    mode: "0o750"
   when: dkim_socket.split(':')[0] == 'local'
 
 - name: Set DKIM configuration
-  template:
+  ansible.builtin.template:
     src: "{{ dkim_config_template }}"
     dest: "{{ dkim_config_file }}"
-    mode: 0644
-  notify: restart opendkim
+    mode: "0o644"
+  notify: Restart opendkim
 
 - name: Create opendkim config directory
-  file:
+  ansible.builtin.file:
     path: "{{ dkim_config_dir }}"
     state: directory
-    mode: 0755
+    mode: "0o755"
 
 - name: Set key table
-  template:
+  ansible.builtin.template:
     src: KeyTable.j2
     dest: "{{ dkim_keytable }}"
-    mode: 0644
-  notify: restart opendkim
+    mode: "0o644"
+  notify: Restart opendkim
 
 - name: Set signing table
-  template:
+  ansible.builtin.template:
     src: SigningTable.j2
     dest: "{{ dkim_signingtable }}"
-    mode: 0644
-  notify: restart opendkim
+    mode: "0o644"
+  notify: Restart opendkim
 
 - name: Set trusted hosts
-  template:
+  ansible.builtin.template:
     src: TrustedHosts.j2
     dest: "{{ dkim_trustedhosts_file }}"
-    mode: 0644
-  notify: restart opendkim
+    mode: "0o644"
+  notify: Restart opendkim
 
 - name: Create opendkim keys directory
-  file: 
+  ansible.builtin.file:
     path: "{{ dkim_key_dir }}"
     state: directory
     owner: opendkim
     group: opendkim
-    mode: 0740
+    mode: "0o740"
 
 - name: Create domain keys directory
-  file:
+  ansible.builtin.file:
     path: "{{ dkim_key_dir }}/{{ dkim_domain }}"
     state: directory
     owner: opendkim
     group: opendkim
-    mode: 0740
+    mode: "0o740"
 
-- name:  Generate private/public keys
-  command:
-    argv: 
+- name: Generate private/public keys
+  ansible.builtin.command:
+    argv:
       - /usr/sbin/opendkim-genkey
       - --bits
       - "{{ dkim_key_bits | default(2048) }}"
@@ -82,35 +82,35 @@
   notify: restart opendkim
 
 - name: Add users to opendkim group
-  user:
+  ansible.builtin.user:
     name: "{{ item }}"
     groups: opendkim
     append: true
   loop: "{{ dkim_socket_users }}"
 
 - name: Set private key ownership
-  file: 
+  ansible.builtin.file:
     path: "{{ dkim_key_dir }}/{{ dkim_domain }}/{{ item }}.private"
     owner: opendkim
     group: opendkim
-    mode: 0600
+    mode: "0o600"
   loop: "{{ dkim_selectors }}"
 
 - name: Create local dkim txt folder
-  file:
+  ansible.builtin.file:
     path: "{{ dkim_local_dir }}"
+    mode: "0o770"
     state: directory
 
 - name: Get DKIM txt files
-  fetch:
+  ansible.builtin.fetch:
     src: "{{ dkim_key_dir + '/' + dkim_domain + '/' + item + '.txt' }}"
     dest: "{{ dkim_local_dir + '/' + dkim_domain + '-' + item + '.txt' }}"
   loop: "{{ dkim_selectors }}"
 
 
 - name: Ensure postfix is started and enabled at boot
-  service:
+  ansible.builtin.service:
     name: opendkim
     state: "{{ dkim_service_state }}"
     enabled: "{{ dkim_service_enabled }}"
-

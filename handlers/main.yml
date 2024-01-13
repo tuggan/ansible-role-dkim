@@ -1,7 +1,7 @@
 ---
 # handlers file for dkim
 
-- name: restart opendkim
-  service:
+- name: Restart opendkim
+  ansible.builtin.service:
     name: opendkim
     state: restarted
