@@ -6,7 +6,7 @@ Deploy and configure [OpenDKIM](http://www.opendkim.org/)
 Requirements
 ------------
 
-None.
+After the role has completed you will have a folder named dkim (unless you changed `dkim_local_dir`) with one .txt file for each domain. You will have to add all domain entries contained within these files as DNS entries for your keys to be valid.
 
 Role Variables
 --------------
@@ -48,6 +48,12 @@ Including an example of how to use your role (for instance, with variables passe
     - hosts: servers
       roles:
          tuggan.dkim
+      vars:
+        dkim_domain: domain.tld
+        dkim_selectors:
+          - homelab
+        dkim_trustedhosts:
+          - 10.0.0.10
 
 License
 -------
